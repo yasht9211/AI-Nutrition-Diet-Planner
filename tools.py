@@ -12,7 +12,7 @@ personalized meal plan.
 """
 
 from dataclasses import dataclass, asdict
-from langchain.tools import Tool
+from langchain_core.tools import Tool
 
 
 ACTIVITY_MULTIPLIERS = {
