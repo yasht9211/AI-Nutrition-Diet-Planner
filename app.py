@@ -111,10 +111,13 @@ st.markdown(
     }}
 
     [data-testid="stSidebar"],
-    [data-testid="stSidebar"] > div,
-    [data-testid="stSidebarContent"] {{
-        background-color: #d95d5d !important;
-        background-image: none !important;
+[data-testid="stSidebar"] > div,
+[data-testid="stSidebarContent"] {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background-image: none !important;
+}
     }}
     [data-testid="stSidebar"] * {{
         color: #262730 !important;
