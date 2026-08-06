@@ -84,7 +84,7 @@ st.markdown(
     [data-testid="stAppViewBlockContainer"],
     [data-testid="block-container"],
     .main .block-container {{
-        background-color: transparent !important;
+        background-color: #6878ad !important;
     }}
 
     /* Readable text over the photo, regardless of light/dark theme or
