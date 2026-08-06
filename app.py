@@ -33,10 +33,11 @@ from tools import calculate_nutrition, ACTIVITY_MULTIPLIERS, GOAL_ADJUSTMENT
 st.set_page_config(page_title="AI Nutrition & Diet Planner", page_icon="🥗", layout="wide")
 
 # ----------------------------- Background styling -----------------------------
-# Uses your "Balanced Diet" photo (assets/background.jpg, shipped alongside
-# this app) as a fixed, softly-dimmed background so the text on top stays
-# readable. Falls back to a plain look if the image file is missing, and
-# tells you exactly why (wrong path in the repo is the #1 cause).
+# Uses your sunset river/landscape photo (assets/background.jpg, shipped
+# alongside this app) as a fixed background so the text on top stays
+# readable regardless of theme. Falls back to a plain look if the image
+# file is missing, and tells you exactly why (wrong path in the repo is
+# the #1 cause).
 import base64
 import os
 from pathlib import Path
@@ -85,6 +86,25 @@ st.markdown(
     .main .block-container {{
         background-color: transparent !important;
     }}
+
+    /* Readable text over the photo, regardless of light/dark theme or
+       which part of the image (bright sky vs dark mountains) sits behind
+       it — dark, slightly bold text with a soft white halo. */
+    [data-testid="stAppViewContainer"] h1,
+    [data-testid="stAppViewContainer"] h2,
+    [data-testid="stAppViewContainer"] h3,
+    [data-testid="stAppViewContainer"] p,
+    [data-testid="stAppViewContainer"] label,
+    [data-testid="stAppViewContainer"] span,
+    [data-testid="stAppViewContainer"] div[data-testid="stMarkdownContainer"],
+    [data-testid="stAppViewContainer"] .stCaption {{
+        color: #1a2333 !important;
+        text-shadow: 0 0 6px rgba(255,255,255,0.75), 0 0 2px rgba(255,255,255,0.75);
+    }}
+    [data-testid="stAppViewContainer"] h1 {{
+        font-weight: 800 !important;
+    }}
+
     [data-testid="stSidebar"],
     [data-testid="stSidebar"] > div,
     [data-testid="stSidebarContent"] {{
@@ -93,6 +113,7 @@ st.markdown(
     }}
     [data-testid="stSidebar"] * {{
         color: #262730 !important;
+        text-shadow: none !important;
     }}
     </style>
     """,
