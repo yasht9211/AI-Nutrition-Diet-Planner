@@ -1,8 +1,9 @@
 """
-AI Nutrition & Diet Planner
-----------------------------
+AI Nutrition & Diet Planner (v2)
+---------------------------------
 Level: Intermediate
 Core concept: LangChain LLM Chain + a custom Python calculator tool
+              + a conversational chat chain (chat with an AI nutritionist)
 Stack: Streamlit + LangChain + Groq / Google Gemini
 
 Flow:
@@ -12,11 +13,16 @@ Flow:
    BMI / BMR / TDEE / calorie target / macros — no LLM guesswork on numbers.
 3. Those numbers + preferences are fed into a LangChain prompt | llm chain,
    which generates a personalized daily meal plan and recommendations.
+4. NEW: A chat panel lets the user talk to an "AI Nutritionist" — a
+   conversational chain that remembers the chat history and, if a plan has
+   already been generated, also knows the user's BMI/calorie/macro numbers
+   so its answers stay consistent with the plan above.
 """
 
 import streamlit as st
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.messages import HumanMessage, AIMessage
 
 from tools import calculate_nutrition, ACTIVITY_MULTIPLIERS, GOAL_ADJUSTMENT
 
@@ -26,18 +32,29 @@ st.set_page_config(page_title="AI Nutrition & Diet Planner", page_icon="🥗", l
 st.sidebar.title("⚙️ Model Settings")
 provider = st.sidebar.selectbox("LLM Provider", ["Groq", "Google Gemini"])
 
+# Try Streamlit Secrets first (App settings -> Secrets on Streamlit Cloud),
+# fall back to manual entry if not configured.
 if provider == "Groq":
-    api_key = st.sidebar.text_input("Groq API Key", type="password")
+    api_key = st.secrets.get("GROQ_API_KEY", "")
     model_name = st.sidebar.selectbox(
         "Model", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
     )
 else:
-    api_key = st.sidebar.text_input("Google API Key", type="password")
+    api_key = st.secrets.get("GOOGLE_API_KEY", "")
     model_name = st.sidebar.selectbox("Model", ["gemini-2.0-flash", "gemini-1.5-pro"])
+
+if api_key:
+    st.sidebar.success(f"✅ {provider} API key loaded from Secrets")
+else:
+    api_key = st.sidebar.text_input(f"{provider} API Key", type="password")
+    st.sidebar.caption(
+        "Tip: add this once under App settings → Secrets on Streamlit Cloud "
+        "so you never have to paste it again."
+    )
 
 st.sidebar.markdown("---")
 st.sidebar.caption(
-    "Your API key is only used for this session and is never stored."
+    "Your API key is only used for this session and is never stored in the app."
 )
 
 
@@ -48,6 +65,13 @@ def get_llm():
     else:
         from langchain_google_genai import ChatGoogleGenerativeAI
         return ChatGoogleGenerativeAI(model=model_name, google_api_key=api_key, temperature=0.4)
+
+
+# session state — keeps the calculated plan & chat history across reruns
+if "nutrition_result" not in st.session_state:
+    st.session_state.nutrition_result = None
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []  # list of HumanMessage / AIMessage
 
 
 # ----------------------------- Main UI -----------------------------
@@ -95,19 +119,6 @@ if generate:
             activity_level=activity_level,
             goal=goal,
         )
-
-    # ----------------------------- Metrics -----------------------------
-    st.subheader("📊 Your Numbers")
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("BMI", result.bmi, result.bmi_category)
-    m2.metric("BMR", f"{result.bmr} kcal")
-    m3.metric("TDEE", f"{result.tdee} kcal")
-    m4.metric("Daily Target", f"{result.calorie_target} kcal")
-
-    st.caption(
-        f"Macro split for '{goal}' → "
-        f"Protein: {result.protein_g} g | Carbs: {result.carbs_g} g | Fat: {result.fat_g} g"
-    )
 
     # Step 2: LangChain LLM Chain generates the personalized plan
     with st.spinner("Asking the AI nutritionist to build your meal plan..."):
@@ -163,12 +174,126 @@ Format the answer as:
             }
         )
 
+    # Save everything to session_state so it survives the rerun that
+    # happens every time the user sends a chat message below.
+    st.session_state.nutrition_result = {
+        "result": result,
+        "plan": plan,
+        "age": age,
+        "gender": gender,
+        "goal": goal,
+        "diet_pref": diet_pref,
+        "cuisine": cuisine or "Any",
+        "allergies": allergies or "None",
+    }
+    st.session_state.chat_history = []  # reset chat when a new plan is made
+
+# ----------------------------- Show plan (if generated) -----------------------------
+if st.session_state.nutrition_result:
+    data = st.session_state.nutrition_result
+    result = data["result"]
+
+    st.subheader("📊 Your Numbers")
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("BMI", result.bmi, result.bmi_category)
+    m2.metric("BMR", f"{result.bmr} kcal")
+    m3.metric("TDEE", f"{result.tdee} kcal")
+    m4.metric("Daily Target", f"{result.calorie_target} kcal")
+    st.caption(
+        f"Macro split for '{data['goal']}' → "
+        f"Protein: {result.protein_g} g | Carbs: {result.carbs_g} g | Fat: {result.fat_g} g"
+    )
+
     st.subheader("📋 Your Personalized Meal Plan")
-    st.markdown(plan)
+    st.markdown(data["plan"])
 
     st.download_button(
         "⬇️ Download Plan as Text",
-        data=plan,
+        data=data["plan"],
         file_name="my_nutrition_plan.txt",
         mime="text/plain",
     )
+
+st.markdown("---")
+
+# ============================================================
+#            💬 CHAT WITH YOUR AI NUTRITIONIST
+# ============================================================
+st.subheader("💬 Chat with your AI Nutritionist")
+st.caption(
+    "Ask follow-up questions — swap a meal, adjust for a cheat day, ask "
+    "about a specific food, etc. The nutritionist remembers this conversation "
+    "and your numbers above (if you've generated a plan)."
+)
+
+# Render existing chat history
+for msg in st.session_state.chat_history:
+    role = "user" if isinstance(msg, HumanMessage) else "assistant"
+    with st.chat_message(role):
+        st.markdown(msg.content)
+
+user_msg = st.chat_input("Ask your AI nutritionist something...")
+
+if user_msg:
+    if not api_key:
+        st.error(f"Please enter your {provider} API key in the sidebar.")
+        st.stop()
+
+    with st.chat_message("user"):
+        st.markdown(user_msg)
+
+    # Build context from the generated plan, if any, so the chatbot's
+    # answers stay consistent with the numbers/plan shown above.
+    if st.session_state.nutrition_result:
+        d = st.session_state.nutrition_result
+        r = d["result"]
+        profile_context = (
+            f"The user's profile: age {d['age']}, gender {d['gender']}, goal '{d['goal']}', "
+            f"dietary preference {d['diet_pref']}, allergies/avoid {d['allergies']}. "
+            f"Their calculated numbers: BMI {r.bmi} ({r.bmi_category}), daily calorie target "
+            f"{r.calorie_target} kcal, macros {r.protein_g}g protein / {r.carbs_g}g carbs / "
+            f"{r.fat_g}g fat. Their generated meal plan:\n{d['plan']}"
+        )
+    else:
+        profile_context = (
+            "The user has not generated a meal plan yet. Answer generally, and "
+            "suggest they fill in the form above and click 'Generate My Plan' "
+            "for personalized numbers."
+        )
+
+    chat_prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "You are a certified, friendly AI nutritionist having an ongoing "
+                "chat with a client. Use the profile/context below ONLY as "
+                "background — don't recalculate numbers yourself, refer back to "
+                "the ones given. Keep answers conversational and concise. Always "
+                "remind the user this is not a substitute for professional "
+                "medical advice when relevant.\n\nContext:\n{profile_context}",
+            ),
+            MessagesPlaceholder("chat_history"),
+            ("human", "{input}"),
+        ]
+    )
+
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            llm = get_llm()
+            chat_chain = chat_prompt | llm | StrOutputParser()
+            response = chat_chain.invoke(
+                {
+                    "profile_context": profile_context,
+                    "chat_history": st.session_state.chat_history,
+                    "input": user_msg,
+                }
+            )
+            st.markdown(response)
+
+    st.session_state.chat_history.append(HumanMessage(content=user_msg))
+    st.session_state.chat_history.append(AIMessage(content=response))
+
+if st.session_state.chat_history:
+    if st.button("🗑️ Clear chat"):
+        st.session_state.chat_history = []
+        st.rerun()
