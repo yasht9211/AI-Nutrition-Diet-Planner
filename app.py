@@ -66,12 +66,19 @@ st.markdown(
     f"""
     <style>
     .stApp,
-    [data-testid="stAppViewContainer"],
-    [data-testid="stHeader"] {{
+    [data-testid="stAppViewContainer"] {{
         {_bg_css}
     }}
-    [data-testid="stHeader"] {{
-        background-color: transparent;
+    [data-testid="stHeader"],
+    [data-testid="stMain"],
+    [data-testid="stMainBlockContainer"],
+    [data-testid="stAppViewBlockContainer"],
+    [data-testid="block-container"],
+    .main .block-container {{
+        background-color: transparent !important;
+    }}
+    [data-testid="stSidebar"] {{
+        background-color: rgba(255, 255, 255, 0.9) !important;
     }}
     </style>
     """,
