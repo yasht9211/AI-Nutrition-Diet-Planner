@@ -64,7 +64,7 @@ def _get_background_css() -> str:
             background-attachment: fixed;
         """
     return """
-        background-image: linear-gradient(180deg, #ffffff 0%, #fbfbf9 100%);
+        background-image: linear-gradient(180deg, #6878ad 0%, #fbfbf9 100%);
         background-attachment: fixed;
     """
 
