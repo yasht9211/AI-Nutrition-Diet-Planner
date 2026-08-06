@@ -112,7 +112,7 @@ st.markdown(
         background-image: none !important;
     }}
     [data-testid="stSidebar"] * {{
-        color: #262730 !important;
+        color: #382c3d !important;
         text-shadow: none !important;
     }}
     </style>
