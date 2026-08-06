@@ -56,7 +56,7 @@ def _get_background_css() -> str:
     if BACKGROUND_IMAGE_PATH is not None:
         encoded = base64.b64encode(BACKGROUND_IMAGE_PATH.read_bytes()).decode()
         return f"""
-            background-image: linear-gradient(rgba(255,255,255,0.35), rgba(255,255,255,0.35)),
+            background-image: linear-gradient(rgba(255,255,255,0.12), rgba(255,255,255,0.12)),
                                url('data:image/jpeg;base64,{encoded}');
             background-size: cover;
             background-position: center;
@@ -99,7 +99,7 @@ st.markdown(
     [data-testid="stAppViewContainer"] div[data-testid="stMarkdownContainer"],
     [data-testid="stAppViewContainer"] .stCaption {{
         color: #1a2333 !important;
-        text-shadow: 0 0 6px rgba(255,255,255,0.75), 0 0 2px rgba(255,255,255,0.75);
+        text-shadow: 0 0 10px rgba(255,255,255,0.95), 0 0 6px rgba(255,255,255,0.9), 0 0 3px rgba(255,255,255,0.9);
     }}
     [data-testid="stAppViewContainer"] h1 {{
         font-weight: 800 !important;
