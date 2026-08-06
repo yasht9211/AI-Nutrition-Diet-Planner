@@ -108,11 +108,11 @@ st.markdown(
     [data-testid="stSidebar"],
     [data-testid="stSidebar"] > div,
     [data-testid="stSidebarContent"] {{
-        background-color: #6878ad !important;
+        background-color: #ffffff !important;
         background-image: none !important;
     }}
     [data-testid="stSidebar"] * {{
-        color: #6878ad !important;
+        color: #ffffff !important;
         text-shadow: none !important;
     }}
     </style>
