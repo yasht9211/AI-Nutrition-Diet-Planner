@@ -98,7 +98,7 @@ st.markdown(
     [data-testid="stAppViewContainer"] span,
     [data-testid="stAppViewContainer"] div[data-testid="stMarkdownContainer"],
     [data-testid="stAppViewContainer"] .stCaption {{
-        color: #1a2333 !important;
+        color: #ffffff !important;
     }}
     [data-testid="stAppViewContainer"] h1 {{
         font-weight: 800 !important;
