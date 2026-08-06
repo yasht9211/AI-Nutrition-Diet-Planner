@@ -56,7 +56,7 @@ def _get_background_css() -> str:
     if BACKGROUND_IMAGE_PATH is not None:
         encoded = base64.b64encode(BACKGROUND_IMAGE_PATH.read_bytes()).decode()
         return f"""
-            background-image: linear-gradient(rgba(255,255,255,0.10), rgba(255,255,255,0.10)),
+            background-image: linear-gradient(rgba(255,255,255,0.22), rgba(255,255,255,0.22)),
                                url('data:image/jpeg;base64,{encoded}');
             background-size: cover;
             background-position: center;
@@ -64,7 +64,7 @@ def _get_background_css() -> str:
             background-attachment: fixed;
         """
     return """
-        background-image: linear-gradient(180deg, #6878ad 0%, #fbfbf9 100%);
+        background-image: linear-gradient(180deg, #ffffff 0%, #fbfbf9 100%);
         background-attachment: fixed;
     """
 
@@ -89,7 +89,7 @@ st.markdown(
 
     /* Readable text over the photo, regardless of light/dark theme or
        which part of the image (bright sky vs dark mountains) sits behind
-       it — dark, slightly bold text with a soft white halo. */
+       it — dark, slightly bold text, no glow/highlight. */
     [data-testid="stAppViewContainer"] h1,
     [data-testid="stAppViewContainer"] h2,
     [data-testid="stAppViewContainer"] h3,
@@ -98,11 +98,16 @@ st.markdown(
     [data-testid="stAppViewContainer"] span,
     [data-testid="stAppViewContainer"] div[data-testid="stMarkdownContainer"],
     [data-testid="stAppViewContainer"] .stCaption {{
-        color: #382c3d !important;
-        text-shadow: 0 0 10px rgba(255,255,255,1), 0 0 6px rgba(255,255,255,1), 0 0 3px rgba(255,255,255,1);
+        color: #1a2333 !important;
     }}
     [data-testid="stAppViewContainer"] h1 {{
         font-weight: 800 !important;
+    }}
+    /* Small text (captions, help text, field labels) bumped up for readability */
+    [data-testid="stAppViewContainer"] .stCaption,
+    [data-testid="stAppViewContainer"] small,
+    [data-testid="stAppViewContainer"] label p {{
+        font-size: 1rem !important;
     }}
 
     [data-testid="stSidebar"],
@@ -111,7 +116,9 @@ st.markdown(
         background-color: #ffffff !important;
         background-image: none !important;
     }}
-    [data-testid="stSidebar"] * {{ color: #ffffff !important; text-shadow: none !important;
+    [data-testid="stSidebar"] * {{
+        color: #262730 !important;
+        text-shadow: none !important;
     }}
     </style>
     """,
