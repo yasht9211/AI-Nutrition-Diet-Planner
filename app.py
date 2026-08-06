@@ -111,10 +111,7 @@ st.markdown(
         background-color: #ffffff !important;
         background-image: none !important;
     }}
-    [data-testid="stSidebar"] {
-    background: rgba(0, 0, 0, 0.4) !important;
-    backdrop-filter: blur(10px);
-}
+    [data-testid="stSidebar"] * {{ color: #ffffff !important; text-shadow: none !important;
     }}
     </style>
     """,
