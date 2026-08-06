@@ -99,7 +99,7 @@ st.markdown(
     [data-testid="stAppViewContainer"] div[data-testid="stMarkdownContainer"],
     [data-testid="stAppViewContainer"] .stCaption {{
         color: #382c3d !important;
-        text-shadow: 0 0 10px rgba(255,255,255,0.95), 0 0 6px rgba(255,255,255,0.9), 0 0 3px rgba(255,255,255,0.9);
+        text-shadow: 0 0 10px rgba(255,255,255,1), 0 0 6px rgba(255,255,255,0.9), 0 0 3px rgba(255,255,255,0.9);
     }}
     [data-testid="stAppViewContainer"] h1 {{
         font-weight: 800 !important;
