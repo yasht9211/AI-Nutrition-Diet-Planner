@@ -35,17 +35,25 @@ st.set_page_config(page_title="AI Nutrition & Diet Planner", page_icon="🥗", l
 # ----------------------------- Background styling -----------------------------
 # Uses your "Balanced Diet" photo (assets/background.jpg, shipped alongside
 # this app) as a fixed, softly-dimmed background so the text on top stays
-# readable. Falls back to a plain look if the image file is missing.
+# readable. Falls back to a plain look if the image file is missing, and
+# tells you exactly why (wrong path in the repo is the #1 cause).
 import base64
 import os
+from pathlib import Path
 
-BACKGROUND_IMAGE_PATH = os.path.join(os.path.dirname(__file__), "assets", "background.jpg")
+_APP_DIR = Path(__file__).resolve().parent
+# Try a couple of likely locations in case the repo structure differs slightly.
+_CANDIDATE_PATHS = [
+    _APP_DIR / "assets" / "background.jpg",
+    _APP_DIR / "background.jpg",
+    Path.cwd() / "assets" / "background.jpg",
+]
+BACKGROUND_IMAGE_PATH = next((p for p in _CANDIDATE_PATHS if p.exists()), None)
 
 
 def _get_background_css() -> str:
-    if os.path.exists(BACKGROUND_IMAGE_PATH):
-        with open(BACKGROUND_IMAGE_PATH, "rb") as f:
-            encoded = base64.b64encode(f.read()).decode()
+    if BACKGROUND_IMAGE_PATH is not None:
+        encoded = base64.b64encode(BACKGROUND_IMAGE_PATH.read_bytes()).decode()
         return f"""
             background-image: linear-gradient(rgba(255,255,255,0.35), rgba(255,255,255,0.35)),
                                url('data:image/jpeg;base64,{encoded}');
@@ -84,6 +92,13 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+if BACKGROUND_IMAGE_PATH is None:
+    st.warning(
+        "⚠️ Background image not found. It should live at **assets/background.jpg** "
+        "in your GitHub repo (same folder as app.py, inside an 'assets' subfolder). "
+        f"Checked: {', '.join(str(p) for p in _CANDIDATE_PATHS)}"
+    )
 
 # ----------------------------- Sidebar: LLM setup -----------------------------
 def get_secret(key: str) -> str:
@@ -337,6 +352,12 @@ if st.session_state.nutrition_result:
                 st.image(url, caption=name, use_container_width=True)
     elif not tavily_key:
         st.info("💡 Add a Tavily API key in the sidebar to see photos of each meal.")
+    else:
+        st.warning(
+            "⚠️ Couldn't fetch meal photos this time — either the Tavily key is "
+            "invalid/expired, or the free quota ran out. Check the key at "
+            "tavily.com and try generating the plan again."
+        )
 
     st.download_button(
         "⬇️ Download Plan as Text",
