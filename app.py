@@ -47,10 +47,11 @@ def _get_background_css() -> str:
         with open(BACKGROUND_IMAGE_PATH, "rb") as f:
             encoded = base64.b64encode(f.read()).decode()
         return f"""
-            background-image: linear-gradient(rgba(255,255,255,0.87), rgba(255,255,255,0.87)),
+            background-image: linear-gradient(rgba(255,255,255,0.35), rgba(255,255,255,0.35)),
                                url('data:image/jpeg;base64,{encoded}');
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
             background-attachment: fixed;
         """
     return """
@@ -59,11 +60,18 @@ def _get_background_css() -> str:
     """
 
 
+_bg_css = _get_background_css()
+
 st.markdown(
     f"""
     <style>
-    .stApp {{
-        {_get_background_css()}
+    .stApp,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stHeader"] {{
+        {_bg_css}
+    }}
+    [data-testid="stHeader"] {{
+        background-color: transparent;
     }}
     </style>
     """,
@@ -71,18 +79,26 @@ st.markdown(
 )
 
 # ----------------------------- Sidebar: LLM setup -----------------------------
+def get_secret(key: str) -> str:
+    """Safely read a Streamlit secret; never raises if no secrets are configured."""
+    try:
+        return st.secrets.get(key, "")
+    except Exception:
+        return ""
+
+
 st.sidebar.title("⚙️ Model Settings")
 provider = st.sidebar.selectbox("LLM Provider", ["Groq", "Google Gemini"])
 
 # Try Streamlit Secrets first (App settings -> Secrets on Streamlit Cloud),
 # fall back to manual entry if not configured.
 if provider == "Groq":
-    api_key = st.secrets.get("GROQ_API_KEY", "")
+    api_key = get_secret("GROQ_API_KEY")
     model_name = st.sidebar.selectbox(
         "Model", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
     )
 else:
-    api_key = st.secrets.get("GOOGLE_API_KEY", "")
+    api_key = get_secret("GOOGLE_API_KEY")
     model_name = st.sidebar.selectbox("Model", ["gemini-2.0-flash", "gemini-1.5-pro"])
 
 if api_key:
@@ -100,7 +116,7 @@ st.sidebar.caption(
 )
 
 # Tavily is used to fetch a representative photo for each meal in your plan.
-tavily_key = st.secrets.get("TAVILY_API_KEY", "") or st.sidebar.text_input(
+tavily_key = get_secret("TAVILY_API_KEY") or st.sidebar.text_input(
     "Tavily API Key (for meal photos)", type="password",
     help="Free key from tavily.com — used to fetch a photo for each meal in your plan.",
 )
