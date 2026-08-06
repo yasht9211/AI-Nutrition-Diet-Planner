@@ -56,7 +56,7 @@ def _get_background_css() -> str:
     if BACKGROUND_IMAGE_PATH is not None:
         encoded = base64.b64encode(BACKGROUND_IMAGE_PATH.read_bytes()).decode()
         return f"""
-            background-image: linear-gradient(rgba(255,255,255,0.12), rgba(255,255,255,0.12)),
+            background-image: linear-gradient(rgba(255,255,255,0.22), rgba(255,255,255,0.22)),
                                url('data:image/jpeg;base64,{encoded}');
             background-size: cover;
             background-position: center;
