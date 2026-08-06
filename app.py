@@ -117,8 +117,7 @@ st.markdown(
       background-image: none !important;
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-    }
-}
+    }}
     }}
     [data-testid="stSidebar"] * {{
         color: #262730 !important;
