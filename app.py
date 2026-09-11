@@ -149,7 +149,7 @@ provider = st.sidebar.selectbox("LLM Provider", ["Groq", "Google Gemini"])
 if provider == "Groq":
     api_key = get_secret("GROQ_API_KEY")
     model_name = st.sidebar.selectbox(
-        "Model", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+        "Model", ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.6-27b"]
     )
 else:
     api_key = get_secret("GOOGLE_API_KEY")
