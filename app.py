@@ -20,13 +20,16 @@ from langchain_core.output_parsers import StrOutputParser
 
 from tools import calculate_nutrition, ACTIVITY_MULTIPLIERS, GOAL_ADJUSTMENT
 
+
 st.set_page_config(
     page_title="AI Nutrition & Diet Planner",
     page_icon="🥗",
     layout="wide"
 )
 
+
 # ----------------------------- Sidebar: LLM setup -----------------------------
+
 st.sidebar.title("⚙️ Model Settings")
 
 provider = st.sidebar.selectbox(
@@ -34,16 +37,17 @@ provider = st.sidebar.selectbox(
     ["Groq", "Google Gemini"]
 )
 
+
 if provider == "Groq":
     api_key = st.sidebar.text_input(
         "Groq API Key",
         type="password"
     )
 
-    # Updated Groq model
+    # Current Groq model
     model_name = st.sidebar.selectbox(
         "Model",
-        ["llama-3.1-8b-instant"]
+        ["openai/gpt-oss-20b"]
     )
 
 else:
@@ -56,6 +60,7 @@ else:
         "Model",
         ["gemini-2.0-flash", "gemini-1.5-pro"]
     )
+
 
 st.sidebar.markdown("---")
 
@@ -95,6 +100,7 @@ st.write(
 
 
 col1, col2, col3 = st.columns(3)
+
 
 with col1:
     age = st.number_input(
@@ -140,6 +146,7 @@ with col3:
 
 
 col4, col5 = st.columns(2)
+
 
 with col4:
     diet_pref = st.selectbox(
@@ -194,7 +201,6 @@ if generate:
     with st.spinner(
         "Calculating BMI, BMR, TDEE and macros..."
     ):
-
         result = calculate_nutrition(
             age=age,
             gender=gender,
@@ -256,7 +262,6 @@ if generate:
                     "concise, and use simple, accessible foods. Always add a short "
                     "disclaimer that this is not medical advice.",
                 ),
-
                 (
                     "human",
                     """Build a {meals_per_day}-meal daily plan for this person:
