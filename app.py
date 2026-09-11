@@ -118,7 +118,6 @@ st.markdown(
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }}
-    }}
     [data-testid="stSidebar"] * {{
         color: #262730 !important;
         text-shadow: none !important;
@@ -152,7 +151,7 @@ provider = st.sidebar.selectbox("LLM Provider", ["Groq", "Google Gemini"])
 if provider == "Groq":
     api_key = get_secret("GROQ_API_KEY")
     model_name = st.sidebar.selectbox(
-        "Model", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+        "Model", ["llama-3.1-8b-instant"]
     )
 else:
     api_key = get_secret("GOOGLE_API_KEY")
